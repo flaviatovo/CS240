@@ -20,6 +20,8 @@ struct {
   struct spinlock lock;
   int use_lock;
   struct run *freelist;
+  uint number_of_pages;
+  int used_pages;
 } kmem;
 
 // Initialization happens in two phases.
@@ -32,13 +34,17 @@ kinit1(void *vstart, void *vend)
 {
   initlock(&kmem.lock, "kmem");
   kmem.use_lock = 0;
+  kmem.number_of_pages = 0;
   freerange(vstart, vend);
+  kmem.used_pages = 0;
 }
 
 void
 kinit2(void *vstart, void *vend)
 {
+  int copy_of_used_pages = kmem.used_pages;
   freerange(vstart, vend);
+  kmem.used_pages = copy_of_used_pages;
   kmem.use_lock = 1;
 }
 
@@ -47,8 +53,10 @@ freerange(void *vstart, void *vend)
 {
   char *p;
   p = (char*)PGROUNDUP((uint)vstart);
-  for(; p + PGSIZE <= (char*)vend; p += PGSIZE)
+  for(; p + PGSIZE <= (char*)vend; p += PGSIZE){
+    kmem.number_of_pages ++;
     kfree(p);
+  }
 }
 
 //PAGEBREAK: 21
@@ -72,6 +80,7 @@ kfree(char *v)
   r = (struct run*)v;
   r->next = kmem.freelist;
   kmem.freelist = r;
+  kmem.used_pages--;
   if(kmem.use_lock)
     release(&kmem.lock);
 }
@@ -89,6 +98,7 @@ kalloc(void)
   r = kmem.freelist;
   if(r)
     kmem.freelist = r->next;
+  kmem.used_pages ++;
   if(kmem.use_lock)
     release(&kmem.lock);
   return (char*)r;
