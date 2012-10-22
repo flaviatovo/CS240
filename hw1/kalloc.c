@@ -11,8 +11,9 @@
 
 #define NUMBEROFPAGES 57069
 #define BITMAPARRAYSIZE 1784 // Number of 32 bits in entries on bitmap table
-#define BITMAPENTRYSIZE 32 // Number of bits per entry in the bitmap table
-#define BITMAPENTRYSIZEB 4  // Number of Bytes in BITMAPENTRYSIZE
+#define BITMAPENTRYSIZE 32   // Number of bits per entry in the bitmap table
+#define BITMAPENTRYSIZEB 4   // Number of bytes in the bitmap entry
+                             // BITMAPENTRYSIZE/4
 
 void initbitmaptable(void *vstart);
 extern char end[]; // first address after kernel loaded from ELF file
@@ -20,8 +21,6 @@ extern char end[]; // first address after kernel loaded from ELF file
 struct {
   struct spinlock lock;
   int use_lock;
-  struct run *freelist;
-  int used_pages;
   uint hint;
   unsigned long int * bitmaptable;
 } kmem;
@@ -37,7 +36,6 @@ kinit1(void *vstart, void *vend)
   initlock(&kmem.lock, "kmem");
   kmem.use_lock = 0;
   initbitmaptable(vstart);
-  kmem.used_pages = 0;
   kmem.hint = 0;
 }
 
@@ -78,8 +76,9 @@ kfree(char *v)
   memset(v, 1, PGSIZE);
 
   // Get correct possition inside bitmap
-  index_in_bitmap = v2p(v)>>5;
-  index_in_entry = v2p(v) & 0x1F;
+  uint temp = (((uint)v - (uint)kmem.bitmaptable)/PGSIZE);
+  index_in_bitmap = temp >> 5;
+  index_in_entry = temp & 0x1F;
 
   if(kmem.use_lock)
     acquire(&kmem.lock);
@@ -88,7 +87,6 @@ kfree(char *v)
   if(kmem.hint > index_in_bitmap)
     kmem.hint = index_in_bitmap;
 
-  kmem.used_pages --;
   if(kmem.use_lock)
     release(&kmem.lock);
 }
@@ -132,11 +130,11 @@ kalloc(void)
       index_in_entry ++;
     } while (chor_result);
 
-    address = ((index_in_bitmap << 4) + index_in_entry)*PGSIZE + (uint) kmem.bitmaptable;
+    address = ((index_in_bitmap << 5) + index_in_entry)*PGSIZE + (uint) kmem.bitmaptable;
 
     kmem.bitmaptable[index_in_bitmap] |= 0x1 << index_in_entry;
 
-    kmem.used_pages ++;
+    kmem.hint = index_in_bitmap;
   }
 
   if(kmem.use_lock)
