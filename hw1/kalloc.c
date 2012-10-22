@@ -10,8 +10,9 @@
 #include "spinlock.h"
 
 #define NUMBEROFPAGES 57069
-#define BITMAPARRAYSIZE 1784
-#define BITMAPENTRYSIZE 32
+#define BITMAPARRAYSIZE 1784 // Number of 32 bits in entries on bitmap table
+#define BITMAPENTRYSIZE 32 // Number of bits per entry in the bitmap table
+#define BITMAPENTRYSIZEB 4  // Number of Bytes in BITMAPENTRYSIZE
 
 void initbitmaptable(void *vstart);
 extern char end[]; // first address after kernel loaded from ELF file
@@ -50,12 +51,11 @@ initbitmaptable(void *vstart){
 
   // Setting values
   // First 2 pages are used for the table
-  memset(kmem.bitmaptable, 3, BITMAPENTRYSIZE >> 4);
+  kmem.bitmaptable[0] = 3;
   // Middle pages are free
-  memset(kmem.bitmaptable + BITMAPENTRYSIZE, 0, (BITMAPARRAYSIZE*BITMAPENTRYSIZE) >> 4);
+  memset(kmem.bitmaptable + BITMAPENTRYSIZEB, 0, BITMAPARRAYSIZE*BITMAPENTRYSIZEB);
   // Last entry uses only 13 bits
-  uint lastpageposition = (BITMAPARRAYSIZE-1)*BITMAPENTRYSIZE;
-  memset(kmem.bitmaptable + lastpageposition, 0xFFFFE000, BITMAPENTRYSIZE >> 4);
+  kmem.bitmaptable[BITMAPARRAYSIZE-1] = 0xFFFFE000;
 }
 
 //PAGEBREAK: 21
