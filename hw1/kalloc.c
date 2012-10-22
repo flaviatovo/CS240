@@ -22,6 +22,7 @@ struct {
   int use_lock;
   struct run *freelist;
   int used_pages;
+  uint hint;
   unsigned long int * bitmaptable;
 } kmem;
 
@@ -37,6 +38,7 @@ kinit1(void *vstart, void *vend)
   kmem.use_lock = 0;
   initbitmaptable(vstart);
   kmem.used_pages = 0;
+  kmem.hint = 0;
 }
 
 void
@@ -66,16 +68,25 @@ initbitmaptable(void *vstart){
 void
 kfree(char *v)
 {
+  int index_in_bitmap = 0;
+  int index_in_entry = 0;
+
   if((uint)v % PGSIZE || v < end || v2p(v) >= PHYSTOP)
     panic("kfree");
 
   // Fill with junk to catch dangling refs.
   memset(v, 1, PGSIZE);
 
+  // Get correct possition inside bitmap
+  index_in_bitmap = v2p(v)>>5;
+  index_in_entry = v2p(v) & 0x1F;
+
   if(kmem.use_lock)
     acquire(&kmem.lock);
 
-  // TODO just  change the value of the bit to 1
+  kmem.bitmaptable[index_in_bitmap] &= ~(0x1 << index_in_entry);
+  if(kmem.hint > index_in_bitmap)
+    kmem.hint = index_in_bitmap;
 
   kmem.used_pages --;
   if(kmem.use_lock)
@@ -89,15 +100,45 @@ char*
 kalloc(void)
 {
   uint address = 0;
+  uint index_in_bitmap = 0;
+  int index_in_entry = -1;
+  int found_empty_page = 0;
+  uint chor_result = 0;
 
   if(kmem.use_lock)
     acquire(&kmem.lock);
 
-  // TODO find any 0 on the table
-  // Set it to 1 and return the position
+  index_in_bitmap = kmem.hint;
 
+  do{
+    chor_result = kmem.bitmaptable[index_in_bitmap] ^ 0xFFFFFFFF;
+    if (chor_result){
+      found_empty_page = 1;
+      break;
+    }
+    else {
+      index_in_bitmap ++;
+      if( index_in_bitmap == BITMAPARRAYSIZE)
+        index_in_bitmap = 0;
+    }
+  } while(index_in_bitmap != kmem.hint);
 
-  kmem.used_pages ++;
+  if(!found_empty_page) {
+    address = 0;
+  }
+  else{
+    do {
+      chor_result >>=1;
+      index_in_entry ++;
+    } while (chor_result);
+
+    address = ((index_in_bitmap << 4) + index_in_entry)*PGSIZE + (uint) kmem.bitmaptable;
+
+    kmem.bitmaptable[index_in_bitmap] |= 0x1 << index_in_entry;
+
+    kmem.used_pages ++;
+  }
+
   if(kmem.use_lock)
     release(&kmem.lock);
   return (char*)address;
