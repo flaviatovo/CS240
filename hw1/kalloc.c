@@ -9,19 +9,19 @@
 #include "mmu.h"
 #include "spinlock.h"
 
-void freerange(void *vstart, void *vend);
-extern char end[]; // first address after kernel loaded from ELF file
+#define NUMBEROFPAGES 57069
+#define BITMAPARRAYSIZE 1784
+#define BITMAPENTRYSIZE 32
 
-struct run {
-  struct run *next;
-};
+void initbitmaptable(void *vstart);
+extern char end[]; // first address after kernel loaded from ELF file
 
 struct {
   struct spinlock lock;
   int use_lock;
   struct run *freelist;
-  uint number_of_pages;
   int used_pages;
+  unsigned long int * bitmaptable;
 } kmem;
 
 // Initialization happens in two phases.
@@ -34,29 +34,28 @@ kinit1(void *vstart, void *vend)
 {
   initlock(&kmem.lock, "kmem");
   kmem.use_lock = 0;
-  kmem.number_of_pages = 0;
-  freerange(vstart, vend);
+  initbitmaptable(vstart);
   kmem.used_pages = 0;
 }
 
 void
 kinit2(void *vstart, void *vend)
 {
-  int copy_of_used_pages = kmem.used_pages;
-  freerange(vstart, vend);
-  kmem.used_pages = copy_of_used_pages;
   kmem.use_lock = 1;
 }
 
 void
-freerange(void *vstart, void *vend)
-{
-  char *p;
-  p = (char*)PGROUNDUP((uint)vstart);
-  for(; p + PGSIZE <= (char*)vend; p += PGSIZE){
-    kmem.number_of_pages ++;
-    kfree(p);
-  }
+initbitmaptable(void *vstart){
+  kmem.bitmaptable = (unsigned long int*)PGROUNDUP((uint)vstart);
+
+  // Setting values
+  // First 2 pages are used for the table
+  memset(kmem.bitmaptable, 3, BITMAPENTRYSIZE >> 4);
+  // Middle pages are free
+  memset(kmem.bitmaptable + BITMAPENTRYSIZE, 0, (BITMAPARRAYSIZE*BITMAPENTRYSIZE) >> 4);
+  // Last entry uses only 13 bits
+  uint lastpageposition = (BITMAPARRAYSIZE-1)*BITMAPENTRYSIZE;
+  memset(kmem.bitmaptable + lastpageposition, 0xFFFFE000, BITMAPENTRYSIZE >> 4);
 }
 
 //PAGEBREAK: 21
@@ -67,8 +66,6 @@ freerange(void *vstart, void *vend)
 void
 kfree(char *v)
 {
-  struct run *r;
-
   if((uint)v % PGSIZE || v < end || v2p(v) >= PHYSTOP)
     panic("kfree");
 
@@ -77,10 +74,10 @@ kfree(char *v)
 
   if(kmem.use_lock)
     acquire(&kmem.lock);
-  r = (struct run*)v;
-  r->next = kmem.freelist;
-  kmem.freelist = r;
-  kmem.used_pages--;
+
+  // TODO just  change the value of the bit to 1
+
+  kmem.used_pages --;
   if(kmem.use_lock)
     release(&kmem.lock);
 }
@@ -91,16 +88,18 @@ kfree(char *v)
 char*
 kalloc(void)
 {
-  struct run *r;
+  uint address = 0;
 
   if(kmem.use_lock)
     acquire(&kmem.lock);
-  r = kmem.freelist;
-  if(r)
-    kmem.freelist = r->next;
+
+  // TODO find any 0 on the table
+  // Set it to 1 and return the position
+
+
   kmem.used_pages ++;
   if(kmem.use_lock)
     release(&kmem.lock);
-  return (char*)r;
+  return (char*)address;
 }
 
