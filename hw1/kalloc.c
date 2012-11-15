@@ -11,8 +11,8 @@
 
 #define NUMBEROFPAGES 57069
 //#define BITS32
-#define BITS16
-//#define BITS8
+//#define BITS16
+#define BITS8
 
 #ifdef BITS32
 ////////////////////////////// 32 BITS ENTRY
@@ -176,7 +176,7 @@ kalloc(void)
   uint index_in_bitmap = 0;
   int index_in_entry = -1;
   int found_empty_page = 0;
-  uint chor_result = 0;
+  unsigned long int chor_result = 0, chor_result_rotate = 0;
 
   if(kmem.use_lock)
     acquire(&kmem.lock);
@@ -184,7 +184,19 @@ kalloc(void)
   index_in_bitmap = kmem.hint;
 
   do{
+#ifdef BITS32
+///////////// 32 BITS
     chor_result = kmem.bitmaptable[index_in_bitmap] ^ 0xFFFFFFFF;
+#endif
+#ifdef BITS16
+///////////// 16 BITS
+    chor_result = kmem.bitmaptable[index_in_bitmap] ^ 0xFFFF;
+#endif
+#ifdef BITS8
+///////////// 8 BITS
+    chor_result = kmem.bitmaptable[index_in_bitmap] ^ 0xFF;
+#endif
+
     if (chor_result){
       found_empty_page = 1;
       break;
@@ -201,9 +213,13 @@ kalloc(void)
   }
   else{
     do {
+      // Being a 32 bits CPU => ALU always uses 32 bits
+      // so no difference for different number of bits in entry
+      chor_result_rotate = ((chor_result >> 1)|(chor_result << 31));
+
       chor_result >>=1;
       index_in_entry ++;
-    } while (chor_result);
+    } while (chor_result == chor_result_rotate);
 
 #ifdef BITS32
 ///////////// 32 BITS

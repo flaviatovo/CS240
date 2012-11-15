@@ -1,0 +1,15 @@
+Explanation of implementation of hw1 for CS240 by Flavia Correia Tovo
+The number of pages presented in the system is 57069 (0xdeed).
+Considering the number of pages, we need to reserve 2 of these pages to the storage of the bitmap. For simplicity, I decided to store my bitmap in the first 2 pages of memory.
+A variable was created in kmem to store the beginning of the array.
+3 options of how to access the data in the bitmap were explored, making the entries of the bitmap have 8, 16 or 32 bits. After performance tests, the option of 8 bits was chosen, but the number for all of them is presented.
+8 Bits Entry:
+	7134 entries on array, giving 57072 pages;
+	the bits that represent the last 3 pages should be 1 because they don’t exist in memory; 
+16 Bits Entry:
+	3567 entries on array, giving 57072 pages;
+	the bits that represent the last 3 pages should be 1 because they don’t exist in memory; 
+32 Bits Entry:
+	1784 entries on array, giving 57088 pages;
+	the bits that represent the last 19 pages should be 1 because they don’t exist in memory;
+To switch between the number of bits used, a constant definition should be changed in file kalloc.c
