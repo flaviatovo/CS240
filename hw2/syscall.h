@@ -28,7 +28,7 @@
 #define SYS_close  21
 
 #define SYS_pgused 22
-#define SYS_SEM_get    23;
-#define SYS_SEM_delete 24;
-#define SYS_SEM_signal 25;
-#define SYS_SEM_wait   26;
+#define SYS_SEM_get    23
+#define SYS_SEM_delete 24
+#define SYS_SEM_signal 25
+#define SYS_SEM_wait   26

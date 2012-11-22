@@ -28,9 +28,9 @@ seminit(void)
   initlock(&semtable.lock, "semtable");
   
   for (int i = 0; i < NSEM; i++)
-    sem_handles[i] = 0;
+    semtable.sem_handles[i] = 0;
 
-  next_handle = 1;
+  semtable.next_handle = 1;
 }
 
 // Function used to get or create a semaphore
@@ -44,33 +44,33 @@ int sem_get(uint name, int value){
   
   // Looking to see if semaphore already exists
   for(int i = 0; i < NSEM; i ++){
-    if (sems[i].name == name){
+    if (semtable.sems[i].name == name){
       // if the one I found is valid, return it
-      if (sem_handles[i] != 0){
+      if (semtable.sem_handles[i] != 0){
         release(&semtable.lock);
-        return sem_handles[i];
+        return semtable.sem_handles[i];
       }
       // if I found the name, but there is no handle, create a new one
-      sems[i].value = value;
-      sem_handles[i] = next_handle;
-      next_handle ++;
+      semtable.sems[i].value = value;
+      semtable.sem_handles[i] = semtable.next_handle;
+      semtable.next_handle ++;
 
       release(&semtable.lock);
-      return sem_handles[i];
+      return semtable.sem_handles[i];
 	}
   }
   // No semaphore with that name
   // Looking for an empty one
   for(int i = 0; i < NSEM; i ++){
     // An empty one was found
-    if (sem_handles[i] == 0){
-      sems[i].name = name;
-      sems[i].value = value;
-      sem_handles[i] = next_handle;
-      next_handle ++;
+    if (semtable.sem_handles[i] == 0){
+      semtable.sems[i].name = name;
+      semtable.sems[i].value = value;
+      semtable.sem_handles[i] = semtable.next_handle;
+      semtable.next_handle ++;
 
       release(&semtable.lock);
-      return sem_handles[i];
+      return semtable.sem_handles[i];
     }
   }
   
@@ -86,10 +86,10 @@ int sem_delete(int handle){
   
   // Looking to see if semaphore still exists
   for(int i = 0; i < NSEM; i ++){
-    if (sem_handles[i] == handle){
+    if (semtable.sem_handles[i] == handle){
 
-      sem_handles[i] = 0;
-      wakeup(sems[i].name);
+      semtable.sem_handles[i] = 0;
+      wakeup(semtable.sems[i].name);
 
       release(&semtable.lock);
       return SEM_OK;
@@ -108,12 +108,12 @@ int sem_signal(int handle){
   
   // Looking to see if semaphore still exists
   for(int i = 0; i < NSEM; i ++){
-    if (sem_handles[i] == handle){
+    if (semtable.sem_handles[i] == handle){
 
       // Increasing the value
-      sems[i].value ++;
+      semtable.sems[i].value ++;
       // Wakeup everyone
-      wakeup(sems[i].name);
+      wakeup(semtable.sems[i].name);
 
       release(&semtable.lock);
       return SEM_OK;
@@ -134,15 +134,15 @@ int sem_wait(int handle){
   // Looking to see if semaphore still exists
   for(int i = 0; i < NSEM; i ++){
 test:
-    if (sem_handles[i] == handle){
-      if(sems[i].value > 0){
+    if (semtable.sem_handles[i] == handle){
+      if(semtable.sems[i].value > 0){
         // Decreasing the value
-        sems[i].value --;
+        semtable.sems[i].value --;
 
         release(&semtable.lock);
         return SEM_OK;
       }
-      sleep(sems[i].name, &semtable.lock);
+      sleep(semtable.sems[i].name, &semtable.lock);
       goto test;
 	}
   }

@@ -103,11 +103,11 @@ sys_pgused(void){
 int
 sys_sem_get(void){
   int name;
-  int value
+  int value;
   
   if(argint(0, &name) < 0)
     return -1;
-  if(argint(0, &value) < 0)
+  if(argint(1, &value) < 0)
     return -1;
   if(name < 0)
     return -1;
