@@ -91,14 +91,13 @@ int sem_delete(int handle){
     if (semtable.sem_handles[i] == handle){
 
       semtable.sem_handles[i] = 0;
-      wakeup(semtable.sems[i].name);
+      wakeup(&semtable.sems[i].name);
 
       release(&semtable.lock);
       return SEM_OK;
 	}
   }
 
-not_found:
   release(&semtable.lock);
   return SEM_DOES_NOT_EXIST;
 }
@@ -116,14 +115,13 @@ int sem_signal(int handle){
       // Increasing the value
       semtable.sems[i].value ++;
       // Wakeup everyone
-      wakeup(semtable.sems[i].name);
+      wakeup(&semtable.sems[i].name);
 
       release(&semtable.lock);
       return SEM_OK;
 	}
   }
 
-not_found:
   release(&semtable.lock);
   return SEM_DOES_NOT_EXIST;
 }
@@ -146,12 +144,11 @@ test:
         release(&semtable.lock);
         return SEM_OK;
       }
-      sleep(semtable.sems[i].name, &semtable.lock);
+      sleep(&semtable.sems[i].name, &semtable.lock);
       goto test;
 	}
   }
 
-not_found:
   release(&semtable.lock);
   return SEM_DOES_NOT_EXIST;
 }

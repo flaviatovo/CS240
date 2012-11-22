@@ -133,10 +133,10 @@ static int (*syscalls[])(void) = {
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
 [SYS_pgused]  sys_pgused,
-[SYS_SEM_get]    sys_sem_get,
-[SYS_SEM_delete] sys_sem_delete,
-[SYS_SEM_signal] sys_sem_signal,
-[SYS_SEM_wait]   sys_sem_wait,
+[SYS_sem_get]    sys_sem_get,
+[SYS_sem_delete] sys_sem_delete,
+[SYS_sem_signal] sys_sem_signal,
+[SYS_sem_wait]   sys_sem_wait,
 };
 
 void
