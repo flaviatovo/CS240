@@ -25,9 +25,10 @@ struct {
 void
 seminit(void)
 {
+  int i;
   initlock(&semtable.lock, "semtable");
   
-  for (int i = 0; i < NSEM; i++)
+  for (i = 0; i < NSEM; i++)
     semtable.sem_handles[i] = 0;
 
   semtable.next_handle = 1;
@@ -39,11 +40,11 @@ seminit(void)
 // If a semaphore with name doesn't exist, create the semaphore,
 // initialize the value as value and return the handler.
 int sem_get(uint name, int value){
-  
+  int i;
   acquire(&semtable.lock);
   
   // Looking to see if semaphore already exists
-  for(int i = 0; i < NSEM; i ++){
+  for(i = 0; i < NSEM; i ++){
     if (semtable.sems[i].name == name){
       // if the one I found is valid, return it
       if (semtable.sem_handles[i] != 0){
@@ -61,7 +62,7 @@ int sem_get(uint name, int value){
   }
   // No semaphore with that name
   // Looking for an empty one
-  for(int i = 0; i < NSEM; i ++){
+  for(i = 0; i < NSEM; i ++){
     // An empty one was found
     if (semtable.sem_handles[i] == 0){
       semtable.sems[i].name = name;
@@ -82,10 +83,11 @@ int sem_get(uint name, int value){
 // Function used to delete a semaphore, if there are processes waiting
 // on that semaphore, they can't be let spleeping forever!
 int sem_delete(int handle){
+  int i;
   acquire(&semtable.lock);
   
   // Looking to see if semaphore still exists
-  for(int i = 0; i < NSEM; i ++){
+  for(i = 0; i < NSEM; i ++){
     if (semtable.sem_handles[i] == handle){
 
       semtable.sem_handles[i] = 0;
@@ -104,10 +106,11 @@ not_found:
 // Used to increase the value of the semaphore, if the value was previously
 // 0, this should wake processes sleeping on name
 int sem_signal(int handle){
+  int i;
   acquire(&semtable.lock);
   
   // Looking to see if semaphore still exists
-  for(int i = 0; i < NSEM; i ++){
+  for(i = 0; i < NSEM; i ++){
     if (semtable.sem_handles[i] == handle){
 
       // Increasing the value
@@ -129,10 +132,11 @@ not_found:
 // should just decrement the value and continue working
 // if value is 0, sleep on name
 int sem_wait(int handle){
+  int i;
   acquire(&semtable.lock);
   
   // Looking to see if semaphore still exists
-  for(int i = 0; i < NSEM; i ++){
+  for(i = 0; i < NSEM; i ++){
 test:
     if (semtable.sem_handles[i] == handle){
       if(semtable.sems[i].value > 0){
