@@ -82,15 +82,72 @@ int sem_get(uint name, int value){
 // Function used to delete a semaphore, if there are processes waiting
 // on that semaphore, they can't be let spleeping forever!
 int sem_delete(int handle){
+  acquire(&semtable.lock);
+  
+  // Looking to see if semaphore still exists
+  for(int i = 0; i < NSEM; i ++){
+    if (sem_handles[i] == handle){
+
+      sem_handles[i] = 0;
+      wakeup(sems[i].name);
+
+      release(&semtable.lock);
+      return SEM_OK;
+	}
+  }
+
+not_found:
+  release(&semtable.lock);
+  return SEM_DOES_NOT_EXIST;
 }
 
 // Used to increase the value of the semaphore, if the value was previously
 // 0, this should wake processes sleeping on name
 int sem_signal(int handle){
+  acquire(&semtable.lock);
+  
+  // Looking to see if semaphore still exists
+  for(int i = 0; i < NSEM; i ++){
+    if (sem_handles[i] == handle){
+
+      // Increasing the value
+      sems[i].value ++;
+      // Wakeup everyone
+      wakeup(sems[i].name);
+
+      release(&semtable.lock);
+      return SEM_OK;
+	}
+  }
+
+not_found:
+  release(&semtable.lock);
+  return SEM_DOES_NOT_EXIST;
 }
 
 // Used to wait for an event on the semaphore, if the value is greater than 0
 // should just decrement the value and continue working
 // if value is 0, sleep on name
 int sem_wait(int handle){
+  acquire(&semtable.lock);
+  
+  // Looking to see if semaphore still exists
+  for(int i = 0; i < NSEM; i ++){
+test:
+    if (sem_handles[i] == handle){
+      if(sems[i].value > 0){
+        // Decreasing the value
+        sems[i].value --;
+
+        release(&semtable.lock);
+        return SEM_OK;
+      }
+      sleep(sems[i].name, &semtable.lock);
+      goto test;
+	}
+  }
+
+not_found:
+  release(&semtable.lock);
+  return SEM_DOES_NOT_EXIST;
 }

@@ -8,7 +8,7 @@
 #define NSEM 10 // Maximum number of semaphores on system
 
 // RETURN CODES
-#define OK 0
+#define SEM_OK 0
 #define SEM_DOES_NOT_EXIST -1
 #define OUT_OF_SEM -2
 
