@@ -1,3 +1,9 @@
+//
+// File modified by Flavia Tovo as work for project 2
+// of OS class on KAUST
+// Fall 2012
+//
+
 #include "types.h"
 #include "x86.h"
 #include "defs.h"
@@ -87,4 +93,51 @@ sys_uptime(void)
   xticks = ticks;
   release(&tickslock);
   return xticks;
+}
+
+int
+sys_pgused(void){
+  return pgused();
+}
+
+int
+sys_sem_get(void){
+  int name;
+  int value
+  
+  if(argint(0, &name) < 0)
+    return -1;
+  if(argint(0, &value) < 0)
+    return -1;
+  if(name < 0)
+    return -1;
+
+  return sem_get(name,value);
+}
+
+int
+sys_sem_delete(void){
+  int handle;
+
+  if(argint(0, &handle) < 0)
+    return -1;
+  return sem_delete(handle);
+}
+
+int
+sys_sem_signal(void){
+  int handle;
+
+  if(argint(0, &handle) < 0)
+    return -1;
+  return sem_signal(handle);
+}
+
+int
+sys_sem_wait(void){
+  int handle;
+
+  if(argint(0, &handle) < 0)
+    return -1;
+  return sem_wait(handle);
 }

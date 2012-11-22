@@ -1,3 +1,9 @@
+//
+// File modified by Flavia Tovo as work for project 2
+// of OS class on KAUST
+// Fall 2012
+//
+
 struct buf;
 struct context;
 struct file;
@@ -66,6 +72,7 @@ char*           kalloc(void);
 void            kfree(char*);
 void            kinit1(void*, void*);
 void            kinit2(void*, void*);
+int             pgused(void);
 
 // kbd.c
 void            kbdintr(void);
@@ -179,3 +186,10 @@ void            clearpteu(pde_t *pgdir, char *uva);
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
+
+// semaphore.c
+int             sem_get(uint, int);
+int             sem_delete(int);
+int             sem_signal(int);
+int             sem_wait(int);
+

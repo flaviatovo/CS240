@@ -1,3 +1,9 @@
+//
+// File modified by Flavia Tovo as work for project 2
+// of OS class on KAUST
+// Fall 2012
+//
+
 struct stat;
 
 // system calls
@@ -22,6 +28,13 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
+
+// system calls for hw2
+int pgused(void);
+int sem_get(uint , int );
+int sem_delete(int );
+int sem_signal(int );
+int sem_wait(int );
 
 // ulib.c
 int stat(char*, struct stat*);

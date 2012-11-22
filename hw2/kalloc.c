@@ -1,3 +1,9 @@
+//
+// File modified by Flavia Tovo as work for project 2
+// of OS class on KAUST
+// Fall 2012
+//
+
 // Physical memory allocator, intended to allocate
 // memory for user processes, kernel stacks, page table pages,
 // and pipe buffers. Allocates 4096-byte pages.
@@ -98,4 +104,20 @@ kalloc(void)
   if(kmem.use_lock)
     release(&kmem.lock);
   return (char*)r;
+}
+
+// Returns the number of pages current allocated.
+int
+pgused(void)
+{
+  int pages;
+
+  if(kmem.use_lock)
+    acquire(&kmem.lock);
+	
+  pages = kmem.used_pages;
+  
+  if(kmem.use_lock)
+    release(&kmem.lock);
+  return pages;
 }

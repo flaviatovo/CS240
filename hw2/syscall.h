@@ -1,3 +1,9 @@
+//
+// File modified by Flavia Tovo as work for project 2
+// of OS class on KAUST
+// Fall 2012
+//
+
 // System call numbers
 #define SYS_fork    1
 #define SYS_exit    2
@@ -20,3 +26,9 @@
 #define SYS_link   19
 #define SYS_mkdir  20
 #define SYS_close  21
+
+#define SYS_pgused 22
+#define SYS_SEM_get    23;
+#define SYS_SEM_delete 24;
+#define SYS_SEM_signal 25;
+#define SYS_SEM_wait   26;

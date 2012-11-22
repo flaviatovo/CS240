@@ -1,3 +1,9 @@
+//
+// File modified by Flavia Tovo as work for project 2
+// of OS class on KAUST
+// Fall 2012
+//
+
 #include "types.h"
 #include "defs.h"
 #include "param.h"
@@ -98,6 +104,11 @@ extern int sys_unlink(void);
 extern int sys_wait(void);
 extern int sys_write(void);
 extern int sys_uptime(void);
+extern int sys_pgused(void);
+extern int sys_sem_get(void);
+extern int sys_sem_delete(void);
+extern int sys_sem_signal(void);
+extern int sys_sem_wait(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -121,6 +132,11 @@ static int (*syscalls[])(void) = {
 [SYS_link]    sys_link,
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
+[SYS_pgused]  sys_pgused,
+[SYS_SEM_get]    sys_sem_get,
+[SYS_SEM_delete] sys_sem_delete,
+[SYS_SEM_signal] sys_sem_signal,
+[SYS_SEM_wait]   sys_sem_wait,
 };
 
 void
