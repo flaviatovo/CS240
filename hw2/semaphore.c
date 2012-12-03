@@ -13,6 +13,13 @@
 #include "semaphore.h"
 #include "spinlock.h"
 
+// This struct is used to store information about 1 semaphore,
+// the list of all semaphores should be stored in a different place
+struct semaphore {
+  int value;         // stores the value of the semaphore
+  uint name;         // stores the name of the semaphore, given in sem_get
+};
+
 struct {
   struct spinlock lock;
 

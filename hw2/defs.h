@@ -188,6 +188,7 @@ void            clearpteu(pde_t *pgdir, char *uva);
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
 
 // semaphore.c
+void            seminit(void);
 int             sem_get(uint, int);
 int             sem_delete(int);
 int             sem_signal(int);
