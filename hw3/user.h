@@ -23,6 +23,15 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 
+// system calls for hw3
+struct ksminfo_t;
+int pgused(void);
+int ksmget(char *, uint);
+int ksmattach(int, int);
+int ksmdetack(int);
+int ksminfo(int, struct ksminfo_t*);
+int ksmdelete(int);
+
 // ulib.c
 int stat(char*, struct stat*);
 char* strcpy(char*, char*);

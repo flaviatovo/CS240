@@ -66,6 +66,7 @@ char*           kalloc(void);
 void            kfree(char*);
 void            kinit1(void*, void*);
 void            kinit2(void*, void*);
+int             pgused(void);
 
 // kbd.c
 void            kbdintr(void);
@@ -179,3 +180,11 @@ void            clearpteu(pde_t *pgdir, char *uva);
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
+
+// ksm.c
+void            ksminit(void);
+int             ksmget(char *, uint);
+int             ksmattach(int, int);
+int             ksmdetack(int);
+int             ksminfo(int, struct ksminfo_t*);
+int             ksmdelete(int);

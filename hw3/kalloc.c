@@ -99,3 +99,19 @@ kalloc(void)
     release(&kmem.lock);
   return (char*)r;
 }
+
+// Returns the number of pages current allocated.
+int
+pgused(void)
+{
+  int pages;
+
+  if(kmem.use_lock)
+    acquire(&kmem.lock);
+	
+  pages = kmem.used_pages;
+  
+  if(kmem.use_lock)
+    release(&kmem.lock);
+  return pages;
+}

@@ -88,3 +88,34 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+int
+sys_pgused(void){
+  return pgused();
+}
+
+// int ksmget(char *, uint);
+// int ksmattach(int, int);
+// int ksmdetack(int);
+// int ksminfo(int, struct ksminfo_t*);
+// int ksmdelete(int);
+int
+sys_ksmget(void){
+  char * name;
+  uint size;
+  int size_in;
+
+if(argstr(0,
+}
+int
+sys_ksmattach(void){
+}
+int
+sys_ksmdetach(void){
+}
+int
+sys_ksminfo(void){
+}
+int
+sys_ksmdelete(void){
+}
