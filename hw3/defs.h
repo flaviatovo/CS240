@@ -1,3 +1,9 @@
+//
+// File modified by Flavia Tovo as work for project 3
+// of OS class on KAUST
+// Fall 2012
+//
+
 struct buf;
 struct context;
 struct file;
@@ -7,6 +13,7 @@ struct proc;
 struct spinlock;
 struct stat;
 struct superblock;
+struct ksminfo_t;
 
 // bio.c
 void            binit(void);
@@ -185,6 +192,6 @@ void            clearpteu(pde_t *pgdir, char *uva);
 void            ksminit(void);
 int             ksmget(char *, uint);
 int             ksmattach(int, int);
-int             ksmdetack(int);
+int             ksmdetach(int);
 int             ksminfo(int, struct ksminfo_t*);
 int             ksmdelete(int);

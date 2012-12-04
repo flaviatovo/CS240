@@ -1,3 +1,9 @@
+//
+// File modified by Flavia Tovo as work for project 3
+// of OS class on KAUST
+// Fall 2012
+//
+
 #include "types.h"
 #include "x86.h"
 #include "defs.h"
@@ -105,17 +111,51 @@ sys_ksmget(void){
   uint size;
   int size_in;
 
-if(argstr(0,
+  if(argstr(0, &name) < 0)
+    return -1;
+  if((argint(1, &size_in) < 0) || (size_in < 0))
+    return -1;
+  size = (unsigned) size_in;
+  
+  return ksmget(name, size);
 }
 int
 sys_ksmattach(void){
+  int handle;
+  int flags;
+  
+  if(argint(0, &handle) < 0)
+    return -1;
+  if(argint(1, &flags) < 0))
+    return -1;
+
+  return ksmattach(handle,flags);
 }
 int
 sys_ksmdetach(void){
+  int handle;
+
+  if(argint(0, &handle) < 0)
+    return -1;
+  return ksmdetach(handle);
 }
 int
 sys_ksminfo(void){
+  int handle;
+  struct ksminfo_t * info;
+  
+  if(argint(0, &handle) < 0)
+    return -1;
+  if(argptr(1, &info, sizeof(struct ksminfo_t)) < 0))
+    return -1;
+
+  return ksminfo(handle,info);
 }
 int
 sys_ksmdelete(void){
+  int handle;
+
+  if(argint(0, &handle) < 0)
+    return -1;
+  return ksmdelete(handle);
 }

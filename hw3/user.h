@@ -1,3 +1,9 @@
+//
+// File modified by Flavia Tovo as work for project 3
+// of OS class on KAUST
+// Fall 2012
+//
+
 struct stat;
 
 // system calls
@@ -28,7 +34,7 @@ struct ksminfo_t;
 int pgused(void);
 int ksmget(char *, uint);
 int ksmattach(int, int);
-int ksmdetack(int);
+int ksmdetach(int);
 int ksminfo(int, struct ksminfo_t*);
 int ksmdelete(int);
 

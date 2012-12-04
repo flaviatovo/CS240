@@ -1,3 +1,9 @@
+//
+// File modified by Flavia Tovo as work for project 3
+// of OS class on KAUST
+// Fall 2012
+//
+
 // Physical memory allocator, intended to allocate
 // memory for user processes, kernel stacks, page table pages,
 // and pipe buffers. Allocates 4096-byte pages.

@@ -4,7 +4,7 @@
 // Fall 2012
 //
 
-// RETURN CODES
+// FLAG CODES
 #define KSM_READWRITE 0
 #define KSM_READ 1
 
@@ -23,6 +23,6 @@ struct ksminfo_t {
 // Added to defs.h
 // int ksmget(char *, uint);
 // int ksmattach(int, int);
-// int ksmdetack(int);
+// int ksmdetach(int);
 // int ksminfo(int, struct ksminfo_t*);
 // int ksmdelete(int);

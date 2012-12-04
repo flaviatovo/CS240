@@ -1,3 +1,9 @@
+//
+// File modified by Flavia Tovo as work for project 3
+// of OS class on KAUST
+// Fall 2012
+//
+
 #include "types.h"
 #include "defs.h"
 #include "param.h"
@@ -28,6 +34,7 @@ main(void)
   consoleinit();   // I/O devices & their interrupts
   uartinit();      // serial port
   pinit();         // process table
+  ksminit();       // semaphores table
   tvinit();        // trap vectors
   binit();         // buffer cache
   fileinit();      // file table
