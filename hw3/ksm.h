@@ -14,7 +14,7 @@ struct ksminfo_t {
   int cpid;                 // PID of the creator
   int mpid;                 // PID of last modifier
   uint attached_nr;         // Number of attached processes
-  uint atime;               // Last attack time
+  uint atime;               // Last attach time
   uint dtime;               // Last detach time
   uint total_shrg_nr;       // Total number of existing shared regions
   uint total_shpg_nr;       // Total number of existing shared pages

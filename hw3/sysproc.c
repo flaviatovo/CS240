@@ -11,6 +11,7 @@
 #include "memlayout.h"
 #include "mmu.h"
 #include "proc.h"
+#include "ksm.h"
 
 int
 sys_fork(void)
@@ -126,7 +127,7 @@ sys_ksmattach(void){
   
   if(argint(0, &handle) < 0)
     return -1;
-  if(argint(1, &flags) < 0))
+  if(argint(1, &flags) < 0)
     return -1;
 
   return ksmattach(handle,flags);
@@ -146,7 +147,7 @@ sys_ksminfo(void){
   
   if(argint(0, &handle) < 0)
     return -1;
-  if(argptr(1, &info, sizeof(struct ksminfo_t)) < 0))
+  if(argptr(1, (char **) &info, sizeof(struct ksminfo_t)) < 0)
     return -1;
 
   return ksminfo(handle,info);
