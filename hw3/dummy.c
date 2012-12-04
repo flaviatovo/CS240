@@ -6,19 +6,29 @@
 int
 main(int argc, char *argv[])
 {
-  int pid;
-  int ksm1,ksm2, ksm3;
+//  int pid;
+  int ksm1,ksm2, ksm3, ksm4;
   
   printf(1,"\nUsed pages: %d\n",pgused());
 
   ksm1 = ksmget("casa", 1024);
+  printf(1,"Used pages: %d\n",pgused());
   ksm2 = ksmget("casa", 4096);
-  ksm3 = ksmget("vida", 5120);
-  printf(1,"\nHandlers: ksm1=%d ksm2=%d ksm3=%d\n",ksm1, ksm2, ksm3);
+  printf(1,"Used pages: %d\n",pgused());
+  ksm3 = ksmget("really_big_name_to_see_what", 5120);
+  printf(1,"Used pages: %d\n",pgused());
+  ksm4 = ksmget("really_big_name_to_see_what", 5120);
+  printf(1,"Used pages: %d\n",pgused());
+  printf(1,"Handlers: ksm1=%d ksm2=%d ksm3=%d ksm4=%d\n",ksm1, ksm2, ksm3, ksm4);
   
   ksmattach(ksm1,KSM_READWRITE);
-  ksmdetack(ksm1);
+  ksmdetach(ksm1);
   ksmdelete(ksm1);
+  printf(1,"Used pages: %d\n",pgused());
+  ksmdelete(ksm2);
+  printf(1,"Used pages: %d\n",pgused());
+  ksmdelete(ksm3);
+  printf(1,"Used pages: %d\n",pgused());
   
   // pid = fork();
   
