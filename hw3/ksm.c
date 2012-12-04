@@ -61,7 +61,7 @@ void ksminit(void){
 }
 
 int ksmget(char * name, uint size){
-  cprintf("ksmdelete called with name=%s size=%d\n", name, size);
+  cprintf("ksmget called with name=%s size=%d\n", name, size);
   int i;
   uint allocated_size = 0;
   
@@ -116,16 +116,20 @@ int ksmget(char * name, uint size){
 int ksminfo(int handle, struct ksminfo_t* info){
   //TODO
   cprintf("ksminfo called with handle=%d\n", handle);
+  acquire(&ksmtable.lock);
+  release(&ksmtable.lock);
   return 0;
 }
 
 int ksmattach(int handle, int flags){
   //TODO
   cprintf("ksmattach called with handle=%d and flags=%d\n", handle, flags);
+  acquire(&ksmtable.lock);
+  release(&ksmtable.lock);
   return 0;
 }
 
-int ksmreleasepages(){
+int ksmreleasepages(int i){
   ksmtable.total_shpg_nr -= ksmtable.ksms[i].pages_number;
   for (;ksmtable.ksms[i].pages_number > 0; ksmtable.ksms[i].pages_number--){
     kfree(ksmtable.ksms[i].pages[ksmtable.ksms[i].pages_number -1]);
@@ -137,11 +141,17 @@ int ksmreleasepages(){
 int ksmdetach(int handle){
   //TODO
   cprintf("ksmdetach called with handle=%d\n", handle);
+  acquire(&ksmtable.lock);
+  release(&ksmtable.lock);
   return 0;
 }
 
 int ksmdelete(int handle){
+  int i;
+  
   cprintf("ksmdelete called with handle=%d\n", handle);
+  
+  acquire(&ksmtable.lock);
   // Looking to see if the shared memory already exists
   for(i = 0; i < KSM_NUMBER; i++){
     if (ksmtable.ksms[i].handle == handle){
@@ -151,7 +161,7 @@ int ksmdelete(int handle){
         return 0;
       }
 	  
-	  ksmreleasepages();
+	  ksmreleasepages(i);
 	  ksmtable.ksms[i].handle = 0;
 	  ksmtable.ksms[i].marked_for_deletion = 0;
       ksmtable.ksms[i].name[0] = '\0';
