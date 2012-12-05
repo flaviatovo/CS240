@@ -419,6 +419,7 @@ int ksmdetachhelper(struct ksm_link * content){
 	if(pte){
 	  *pte = 0;
 	}
+	*pde = 0;
 	content->address += PGSIZE;
   }
   return 0;
