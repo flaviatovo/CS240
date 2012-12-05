@@ -59,9 +59,9 @@ struct {
 } ksmtable;
 
 static __inline__ uint getticks(void) {
-  uint a;
+  unsigned a, d;
   asm("cpuid");
-  asm volatile("rdtsc" : "=a" (a));
+  asm volatile("rdtsc" : "=a" (a), "=d" (d));
 
   return a;
 }
