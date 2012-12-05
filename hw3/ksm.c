@@ -247,19 +247,19 @@ int ksmattach(int handle, int flags){
   }
   
   // Link found, seting other values on link
-  if (ksmtable.attachments[i].permission == -1){
-    ksmtable.attachments[i].permission = flags;
+  if (ksmtable.attachments[found_handle_i].permission == -1){
+    ksmtable.attachments[found_handle_i].permission = flags;
   }
   else {
     // The one we found has different permissions, need to create a new one
     ksmtable.attachments[empty_slot].pid = proc->pid;
     ksmtable.attachments[empty_slot].permission = flags;
     ksmtable.attachments[empty_slot].handle = handle;
-    ksmtable.attachments[empty_slot].ksm_id = ksmtable.attachments[i].ksm_id;
-    i = empty_slot;
+    ksmtable.attachments[empty_slot].ksm_id = ksmtable.attachments[found_handle_i].ksm_id;
+    found_handle_i = empty_slot;
   }
   
-  ret = ksmattachhelper(&ksmtable.attachments[i]);
+  ret = ksmattachhelper(&ksmtable.attachments[found_handle_i]);
   
   release(&ksmtable.lock);
   return ret;
