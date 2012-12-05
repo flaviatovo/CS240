@@ -361,7 +361,7 @@ int ksmattachhelper(struct ksm_link * content){
   
   ksmtable.ksms[i].mpid = proc->pid;
   
-  content->address = (uint) KERNBASE - proc->ssm - ksmtable.ksms[i].ksmsz;
+  content->address = (uint) KERNBASE - proc->ssm - ksmtable.ksms[i].ksmsz - PGSIZE;
   if (content->address < proc->sz) {
     content->address = 0;
 	return 0;
@@ -370,7 +370,7 @@ int ksmattachhelper(struct ksm_link * content){
   if (content->permission == KSM_READWRITE)
     perm = PTE_U | PTE_W;
   else
-   perm = PTE_U;
+    perm = PTE_U;
   
   va = content->address;
   for (j = 0; j< ksmtable.ksms[i].pages_number; j ++){
@@ -386,6 +386,7 @@ int ksmattachhelper(struct ksm_link * content){
 	va +=PGSIZE;
   }
   ksmtable.ksms[i].attached_nr ++;
+  proc->ssm += ksmtable.ksms[i].ksmsz;
   
   return content->address;
 }
