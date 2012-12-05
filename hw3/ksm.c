@@ -26,7 +26,7 @@ struct ksm_object {
   uint ksmsz;       // The size of the shared memory
   int cpid;         // PID of the creator
   int mpid;         // PID of last modifier
-  uint attached_nr; // Number of attached processes
+  int attached_nr; // Number of attached processes
   uint atime;       // Last attach time
   uint dtime;       // Last detach time
   
