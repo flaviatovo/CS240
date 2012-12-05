@@ -114,7 +114,7 @@ pgused(void)
 
   if(kmem.use_lock)
     acquire(&kmem.lock);
-	
+    
   pages = kmem.used_pages;
   
   if(kmem.use_lock)

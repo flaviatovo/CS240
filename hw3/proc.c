@@ -174,7 +174,7 @@ exit(void)
 
   if(proc == initproc)
     panic("init exiting");
-	
+    
   // Detach all shared memory
   ksmdetachall();
   

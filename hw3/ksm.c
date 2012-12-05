@@ -83,7 +83,7 @@ void ksminit(void){
   for (i = 0; i < KSM_MAX_ATTACHMENTS; i++) {
     ksmtable.attachments[i].pid = 0;
     ksmtable.attachments[i].handle = 0;
-	ksmtable.attachments[i].permission = -1;
+    ksmtable.attachments[i].permission = -1;
   }
   
   ksmtable.total_shrg_nr = 0;
@@ -94,7 +94,6 @@ void ksminit(void){
 }
 
 int ksmget(char * name, uint size){
-  cprintf("ksmget called with name=%s size=%d\n", name, size);
   int i, j;
   uint allocated_size = 0;
   
@@ -202,7 +201,7 @@ int ksmget(char * name, uint size){
 int ksminfo(int handle, struct ksminfo_t* info){
   int i;
   int ksm_id = 0;
-  cprintf("ksminfo called with handle=%d\n", handle);
+  
   acquire(&ksmtable.lock);
   
   info->total_shrg_nr = ksmtable.total_shrg_nr;
@@ -242,7 +241,6 @@ int ksmattach(int handle, int flags){
   int empty_slot = -1;
   int ret = 0;
   
-  cprintf("ksmattach called with handle=%d and flags=%d\n", handle, flags);
   acquire(&ksmtable.lock);
   
   // Finding the correct link
@@ -283,14 +281,13 @@ int ksmdetach(int handle){
   int i;
   int detached;
   
-  cprintf("ksmdetach called with handle=%d\n", handle);
   acquire(&ksmtable.lock);
   
   // Finding the correct link
   for (i = 0; i < KSM_MAX_ATTACHMENTS; i ++){
     if (ksmtable.attachments[i].handle == handle){
       if (ksmtable.attachments[i].pid == proc->pid) {
-	    detached = 1;
+        detached = 1;
         ksmdetachhelper(& ksmtable.attachments[i]);
       }
     }
@@ -305,8 +302,6 @@ int ksmdetach(int handle){
 int ksmdelete(int handle){
   int i, j;
   int ksm_id = 0;
-  
-  cprintf("ksmdelete called with handle=%d\n", handle);
   
   acquire(&ksmtable.lock);
   // Looking to see if the shared memory already exists
@@ -369,8 +364,8 @@ int ksmattachhelper(struct ksm_link * content){
   // finding ksm
   for (i = 0; i < KSM_NUMBER; i ++){
     if (content->ksm_id == ksmtable.ksms[i].ksm_id){
-	  break;
-	}
+      break;
+    }
   }
   
   ksmtable.ksms[i].mpid = proc->pid;
@@ -379,7 +374,7 @@ int ksmattachhelper(struct ksm_link * content){
   content->address = (uint) KERNBASE - proc->ssm - ksmtable.ksms[i].ksmsz - PGSIZE;
   if (content->address < proc->sz) {
     content->address = 0;
-	return 0;
+    return 0;
   }
   
   if (content->permission == KSM_READWRITE)
@@ -390,15 +385,15 @@ int ksmattachhelper(struct ksm_link * content){
   va = content->address;
   for (j = 0; j< ksmtable.ksms[i].pages_number; j ++){
     // work of waldpgdir
-	pte = (pte_t*)ksmtable.ksms[i].pages[j];
-	pde = &proc->pgdir[PDX((void*)va)];
-	*pde = v2p(ksmtable.ksms[i].pages[j]) | PTE_P |PTE_W | PTE_U;
-	
-	// work of mappages
-	pte = &pte[PTX((void *)va)];
+    pte = (pte_t*)ksmtable.ksms[i].pages[j];
+    pde = &proc->pgdir[PDX((void*)va)];
+    *pde = v2p(ksmtable.ksms[i].pages[j]) | PTE_P |PTE_W | PTE_U;
+    
+    // work of mappages
+    pte = &pte[PTX((void *)va)];
     *pte = ((uint) ksmtable.ksms[i].pages[j]) | perm | PTE_P;
-	
-	va +=PGSIZE;
+    
+    va +=PGSIZE;
   }
   ksmtable.ksms[i].attached_nr ++;
   proc->ssm += ksmtable.ksms[i].ksmsz;
@@ -418,9 +413,9 @@ int ksmdetachhelper(struct ksm_link * content){
   // finding size
   for (i = 0; i < KSM_NUMBER; i ++){
     if (content->ksm_id == ksmtable.ksms[i].ksm_id){
-	  pages_number = ksmtable.ksms[i].pages_number;
-	  break;
-	}
+      pages_number = ksmtable.ksms[i].pages_number;
+      break;
+    }
   }
   
   ksmtable.ksms[i].mpid = proc->pid;
@@ -428,12 +423,12 @@ int ksmdetachhelper(struct ksm_link * content){
   
   if (pages_number == 0){
     content->address = 0;
-	return -1;
+    return -1;
   }
   
   if (ksmtable.ksms[i].marked_for_deletion && (ksmtable.ksms[i].attached_nr <= 1)){
-	ksmreleasepages(i);
-	ksmtable.ksms[i].attached_nr = 0;
+    ksmreleasepages(i);
+    ksmtable.ksms[i].attached_nr = 0;
   }
   else {
     ksmtable.ksms[i].attached_nr --;
@@ -442,14 +437,14 @@ int ksmdetachhelper(struct ksm_link * content){
   for (i = 0; i < pages_number; i++){
     //Doing the work of walkpgdir
     pde = &proc->pgdir[PDX((char*)content->address)];
-	pte = (pte_t*)p2v(PTE_ADDR(*pde));
-	pte = &pte[PTX((char*)content->address)];
-	
-	if(pte){
-	  *pte = 0;
-	}
-	*pde = 0;
-	content->address += PGSIZE;
+    pte = (pte_t*)p2v(PTE_ADDR(*pde));
+    pte = &pte[PTX((char*)content->address)];
+    
+    if(pte){
+      *pte = 0;
+    }
+    *pde = 0;
+    content->address += PGSIZE;
   }
   return 0;
 }

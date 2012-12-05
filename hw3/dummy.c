@@ -38,7 +38,7 @@ main(int argc, char *argv[])
     // if (sem_wait(sem) != 0)
        // printf(1,"\nERROR on wait\n");
     // printf(1,"\nAfter calling wait\n");
-	// if (pid != 0)
+    // if (pid != 0)
       // wait();
   // } else {
     // printf(1,"\nBefore calling signal 1 on %d\n",pid);
