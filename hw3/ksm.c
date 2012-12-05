@@ -361,7 +361,7 @@ int ksmattachhelper(struct ksm_link * content){
   
   ksmtable.ksms[i].mpid = proc->pid;
   
-  content->address = (uint) p2v(PHYSTOP) - proc->ssm - ksmtable.ksms[i].ksmsz;
+  content->address = (uint) KERNBASE - proc->ssm - ksmtable.ksms[i].ksmsz;
   if (content->address < proc->sz) {
     content->address = 0;
 	return 0;
