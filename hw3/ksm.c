@@ -359,9 +359,10 @@ int ksmattachhelper(struct ksm_link * content){
 	}
   }
   
+  ksmtable.ksms[i].mpid = proc->pid;
+  
   content->address = (uint) p2v(PHYSTOP) - proc->ssm - ksmtable.ksms[i].ksmsz;
   if (content->address < proc->sz) {
-  // TODO test overlap
     content->address = 0;
 	return 0;
   }
@@ -376,7 +377,7 @@ int ksmattachhelper(struct ksm_link * content){
     // work of waldpgdir
 	pte = (pte_t*)ksmtable.ksms[i].pages[j];
 	pde = &proc->pgdir[PDX((void*)va)];
-	*pde = v2p(pte) | PTE_P |PTE_W | PTE_U;
+	*pde = v2p(ksmtable.ksms[i].pages[j]) | PTE_P |PTE_W | PTE_U;
 	
 	// work of mappages
 	pte = &pte[PTX((void *)va)];
@@ -384,6 +385,7 @@ int ksmattachhelper(struct ksm_link * content){
 	
 	va +=PGSIZE;
   }
+  ksmtable.ksms[i].attached_nr ++;
   
   return content->address;
 }
@@ -405,10 +407,17 @@ int ksmdetachhelper(struct ksm_link * content){
 	}
   }
   
+  ksmtable.ksms[i].mpid = proc->pid;
+  
   if (pages_number == 0){
     content->address = 0;
 	return -1;
   }
+  
+  if (ksmtable.ksms[i].marked_for_deletion && (ksmtable.ksms[i].attached_nr <= 1)){
+	ksmreleasepages(i);
+  }
+  ksmtable.ksms[i].attached_nr --;
   
   for (i = 0; i < pages_number; i++){
     //Doing the work of walkpgdir
