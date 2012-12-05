@@ -468,6 +468,9 @@ int ksmdetachall() {
       ksmtable.attachments[i].ksm_id = 0;
     }
   }
+  
+  proc->ssm = 0;
+  
   release(&ksmtable.lock);
   return 0;
 }

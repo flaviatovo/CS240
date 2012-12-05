@@ -174,7 +174,10 @@ exit(void)
 
   if(proc == initproc)
     panic("init exiting");
-
+	
+  // Detach all shared memory
+  ksmdetachall();
+  
   // Close all open files.
   for(fd = 0; fd < NOFILE; fd++){
     if(proc->ofile[fd]){
@@ -183,9 +186,6 @@ exit(void)
     }
   }
   
-  // Detach all shared memory
-  ksmdetachall();
-
   iput(proc->cwd);
   proc->cwd = 0;
 
