@@ -34,7 +34,7 @@ main(void)
   consoleinit();   // I/O devices & their interrupts
   uartinit();      // serial port
   pinit();         // process table
-  ksminit();       // semaphores table
+  ksminit();       // ksm table init
   tvinit();        // trap vectors
   binit();         // buffer cache
   fileinit();      // file table

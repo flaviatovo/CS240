@@ -154,6 +154,9 @@ fork(void)
       np->ofile[i] = filedup(proc->ofile[i]);
   np->cwd = idup(proc->cwd);
  
+  // Copy of shared memory
+  ksminherit(np);
+  
   pid = np->pid;
   np->state = RUNNABLE;
   safestrcpy(np->name, proc->name, sizeof(proc->name));
@@ -179,6 +182,9 @@ exit(void)
       proc->ofile[fd] = 0;
     }
   }
+  
+  // Detach all shared memory
+  ksmdetachall();
 
   iput(proc->cwd);
   proc->cwd = 0;

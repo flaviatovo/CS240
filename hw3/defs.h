@@ -195,3 +195,5 @@ int             ksmattach(int, int);
 int             ksmdetach(int);
 int             ksminfo(int, struct ksminfo_t*);
 int             ksmdelete(int);
+int             ksminherit(struct proc *);   // clone attachments from parent (used on fork)
+int             ksmdetachall(); // used on exec and exit

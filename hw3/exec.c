@@ -20,6 +20,10 @@ exec(char *path, char **argv)
 
   if((ip = namei(path)) == 0)
     return -1;
+  
+  // Detach all shared memory
+  ksmdetachall();
+  
   ilock(ip);
   pgdir = 0;
 
