@@ -75,6 +75,7 @@ void ksminit(void){
   for (i = 0; i < KSM_MAX_ATTACHMENTS; i++) {
     ksmtable.attachments[i].pid = 0;
     ksmtable.attachments[i].handle = 0;
+	ksmtable.attachments[i].permission = -1;
   }
   
   ksmtable.total_shrg_nr = 0;
@@ -240,7 +241,7 @@ int ksmattach(int handle, int flags){
         return ksmtable.attachments[i].address;
       }
     }
-    if (ksmtable.attachments[i].handle == 0){
+    if ((ksmtable.attachments[i].handle == 0) && (empty_slot == -1)){
       empty_slot = i;
     }
   }
@@ -276,7 +277,7 @@ int ksmdetach(int handle){
     if (ksmtable.attachments[i].handle == handle){
       if (ksmtable.attachments[i].pid == proc->pid) {
 	    detached = 1;
-        ksmattachhelper(& ksmtable.attachments[i]);
+        ksmdetachhelper(& ksmtable.attachments[i]);
       }
     }
   }
