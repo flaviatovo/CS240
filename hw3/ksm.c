@@ -368,7 +368,7 @@ int ksmattachhelper(struct ksm_link * content){
   }
   
   ksmtable.ksms[i].mpid = proc->pid;
-  ksmtable.ksms[i].atime = getticks();
+  //ksmtable.ksms[i].atime = getticks();
   
   content->address = (uint) KERNBASE - proc->ssm - ksmtable.ksms[i].ksmsz - PGSIZE;
   if (content->address < proc->sz) {
@@ -418,7 +418,7 @@ int ksmdetachhelper(struct ksm_link * content){
   }
   
   ksmtable.ksms[i].mpid = proc->pid;
-  ksmtable.ksms[i].dtime = getticks();
+  //ksmtable.ksms[i].dtime = getticks();
   
   if (pages_number == 0){
     content->address = 0;
