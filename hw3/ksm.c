@@ -58,6 +58,14 @@ struct {
   int next_ksmid;
 } ksmtable;
 
+static __inline__ uint getticks(void) {
+  uint a;
+  asm("cpuid");
+  asm volatile("rdtsc" : "=a" (a));
+
+  return a;
+}
+
 int ksmattachhelper(struct ksm_link * content);
 int ksmdetachhelper(struct ksm_link * content);
 int ksmreleasepages(int i);
@@ -360,6 +368,7 @@ int ksmattachhelper(struct ksm_link * content){
   }
   
   ksmtable.ksms[i].mpid = proc->pid;
+  ksmtable.ksms[i].atime = getticks();
   
   content->address = (uint) KERNBASE - proc->ssm - ksmtable.ksms[i].ksmsz - PGSIZE;
   if (content->address < proc->sz) {
@@ -409,6 +418,7 @@ int ksmdetachhelper(struct ksm_link * content){
   }
   
   ksmtable.ksms[i].mpid = proc->pid;
+  ksmtable.ksms[i].dtime = getticks();
   
   if (pages_number == 0){
     content->address = 0;
@@ -417,8 +427,11 @@ int ksmdetachhelper(struct ksm_link * content){
   
   if (ksmtable.ksms[i].marked_for_deletion && (ksmtable.ksms[i].attached_nr <= 1)){
 	ksmreleasepages(i);
+	ksmtable.ksms[i].attached_nr = 0;
   }
-  ksmtable.ksms[i].attached_nr --;
+  else {
+    ksmtable.ksms[i].attached_nr --;
+  }
   
   for (i = 0; i < pages_number; i++){
     //Doing the work of walkpgdir
@@ -463,6 +476,7 @@ int ksminherit(struct proc * np) {
         return -1;
     }
   }
+  
   release(&ksmtable.lock);
   return 0;
 }
