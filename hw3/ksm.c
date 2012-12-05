@@ -134,7 +134,13 @@ int ksmget(char * name, uint size){
     }
   }
   
-  // No Shared memory with that name, creating a new one
+  // No Shared memory with that name, testing size
+  // before creating a new one
+  if (size > (KERNBASE - proc->ssm - proc->sz)){
+    release(&ksmtable.lock);
+    return 0;
+  }
+  
   // Finding free slot
   for(i = 0; i < KSM_NUMBER; i++){
     if (ksmtable.ksms[i].ksm_id == 0){

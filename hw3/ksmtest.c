@@ -6,7 +6,7 @@
 
 // KAUST SHARED MEMORY
 #define KSM_RDWR           0x00
-#define KSM_READ           0x01
+#define KSM_RD             0x01
 
 static void
 ksminfo_dump(int hd, struct ksminfo_t *info)
@@ -47,7 +47,7 @@ main(int argc, char *argv[])
 
   ret = ksmattach(hd, KSM_RDWR);
 
-  if (ret == 0) {
+  if (ret != 0) {
     printf(1, "ksmattach success!\n" );
   } else {
     printf(1, "ksmattach fail!\n" );
@@ -82,7 +82,7 @@ main(int argc, char *argv[])
   printf(1, "      TEST DETACH     \n");
   printf(1, "======================\n");
   ret = ksminfo(hd, &info);
-  if (ret >0) {
+  if (ret == 0) {
     printf(1, "ksminfo success!\n" );
   } else {
     printf(1, "ksminfo fail!\n" );
@@ -106,7 +106,7 @@ main(int argc, char *argv[])
   if (oldanr - newanr != 1) {
     printf(1, "------FAILED: num of attached processes is not updated!\n");
   } else {
-    printf(1, "------SUCCESS: num of attached processes is not updated!\n"); 
+    printf(1, "------SUCCESS: num of attached processes is updated!\n"); 
   }
 
   printf(1, "\n======================\n");
@@ -118,18 +118,6 @@ main(int argc, char *argv[])
     printf(1, "ksmdelete success!\n" );
   } else {
     printf(1, "ksmdelete fail!\n" );
-  }
-
-  printf(1, "Then we check whether the slot with handler=%d is recyled again.\n", hd );
-  int hdold = hd;
-  hd = ksmget("shm3", PGSIZE);
-  printf(1, "KSMGET for shm3: hd = %d\n", hd );
-  // This test may only works for my implementation,
-  // cause I insert the deleted pages at the head of the linked-list
-  if (hd == hdold) {
-    printf(1, "------SUCCESS: The slot with handler=%d is recyled!\n", hd );
-  } else {
-    printf(1, "------FAILED: The slot with handler=%d is NOT recyled!\n", hd );    
   }
 
   printf(1, "\n======================\n");
