@@ -136,7 +136,7 @@ int ksmget(char * name, uint size){
   
   // No Shared memory with that name, testing size
   // before creating a new one
-  if (size > (KERNBASE - proc->ssm - proc->sz)){
+  if ((size > (KERNBASE - proc->ssm - proc->sz))||(size > PGSIZE*KSM_MAX_NUMBER_PAGES)){
     release(&ksmtable.lock);
     return 0;
   }
