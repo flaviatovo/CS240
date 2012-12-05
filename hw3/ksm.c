@@ -44,7 +44,7 @@ struct ksm_link {
   int permission;// pid + handle + permission is key
   int ksm_id;    // used to do the link between ksm_object, pid with permissions
   int address;   // value returned by ksm_attached, address of the first page on va.
-}
+};
 
 struct {
   struct spinlock lock;
@@ -130,7 +130,7 @@ int ksmget(char * name, uint size){
   for(i = 0; i < KSM_NUMBER; i++){
     if (ksmtable.ksms[i].ksm_id == 0){
       // Empty slot found
-      ksmtable.ksms[i].ksm_id = ksmtable.ksm_id;
+      ksmtable.ksms[i].ksm_id = ksmtable.next_ksmid;
       strncpy(ksmtable.ksms[i].name,name, KSM_NAME_SIZE);
       
       ksmtable.ksms[i].cpid = proc->pid;
@@ -155,7 +155,7 @@ int ksmget(char * name, uint size){
       ksmtable.ksms[i].atime = 0;
       ksmtable.ksms[i].dtime = 0;      
       
-      ksmtable.ksm_id ++;
+      ksmtable.next_ksmid ++;
       ksmtable.total_shrg_nr ++;
       ksmtable.total_shpg_nr += ksmtable.ksms[i].pages_number;
       
@@ -254,7 +254,7 @@ int ksmattach(int handle, int flags){
     ksmtable.attachments[empty_slot].pid = proc->pid;
     ksmtable.attachments[empty_slot].permission = flags;
     ksmtable.attachments[empty_slot].handle = handle;
-    ksmtable.attachments[empty_slot].ksm_id = ksm_id;
+    ksmtable.attachments[empty_slot].ksm_id = ksmtable.attachments[i].ksm_id;
     i = empty_slot;
   }
   
@@ -282,7 +282,7 @@ int ksmdetach(int handle){
   }
   
   release(&ksmtable.lock);
-  if (detached = 1)
+  if (detached == 1)
     return 0;
   return -1;
 }
@@ -345,7 +345,7 @@ int ksmreleasepages(int i){
 }
 
 int ksmattachhelper(struct ksm_link * content){
-  int i;
+  int i, j;
   pte_t * pte;
   pde_t * pde;
   int perm;
@@ -354,7 +354,6 @@ int ksmattachhelper(struct ksm_link * content){
   // finding ksm
   for (i = 0; i < KSM_NUMBER; i ++){
     if (content->ksm_id == ksmtable.ksms[i].ksm_id){
-	  pages_number = ksmtable.ksms[i].pages_number;
 	  break;
 	}
   }
@@ -374,8 +373,8 @@ int ksmattachhelper(struct ksm_link * content){
   va = content->address;
   for (j = 0; j< ksmtable.ksms[i].pages_number; j ++){
     // work of waldpgdir
-	pte = ksmtable.ksms[i].pages[j];
-	pde = &proc->pgdir[PDX(()void*)va];
+	pte = (pte_t*)ksmtable.ksms[i].pages[j];
+	pde = &proc->pgdir[PDX((void*)va)];
 	*pde = v2p(pte) | PTE_P |PTE_W | PTE_U;
 	
 	// work of mappages
@@ -391,6 +390,7 @@ int ksmattachhelper(struct ksm_link * content){
 int ksmdetachhelper(struct ksm_link * content){
   int i;
   pte_t *pte;
+  pde_t *pde;
   uint pages_number = 0;
   
   if (content->address == 0)
@@ -410,7 +410,11 @@ int ksmdetachhelper(struct ksm_link * content){
   }
   
   for (i = 0; i < pages_number; i++){
-    pte = walkpgdir(proc->pgdir, (char*)content->address, 0);
+    //Doing the work of walkpgdir
+    pde = &proc->pgdir[PDX((char*)content->address)];
+	pte = (pte_t*)p2v(PTE_ADDR(*pde));
+	pte = &pte[PTX((char*)content->address)];
+	
 	if(pte){
 	  *pte = 0;
 	}
